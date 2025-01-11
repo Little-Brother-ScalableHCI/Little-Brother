@@ -18,12 +18,14 @@ services:
   speech-to-text:
     build: speech-to-text
     privileged: true
-    depends_on:
-      - redis
     volumes:
       - /dev:/dev
+    depends_on:
+      - redis
     networks:
       - redis
+    logging:
+      driver: none
 
   text-to-commands:
     build: text-to-commands
@@ -31,6 +33,16 @@ services:
       - redis
     networks:
       - redis
+
+  vision:
+    build: vision
+    privileged: true
+    volumes:
+      - /dev:/dev
+    depends_on:
+      - redis
+    network_mode: "host"
+
 
 networks:
   redis:

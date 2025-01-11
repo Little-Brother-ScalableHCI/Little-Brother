@@ -185,6 +185,11 @@ def main():
         # Process the transcribed text
         doc = nlp(text_input)
         structured_cmd = build_command_structure(text_input, doc)
+
+        if not structured_cmd["object"]:
+            # If no tool found, skip
+            continue
+
         db.set("command", pickle.dumps(structured_cmd))
         db.publish("command", pickle.dumps(structured_cmd))
         print("Structured Command:", structured_cmd)

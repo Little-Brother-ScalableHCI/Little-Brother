@@ -1,5 +1,11 @@
 {% extends 'remote/index.html' %}
 
 {% block content %}
-    <h1>map</h1>
+<div id="map-container">
+    <div id="p5-canvas"></div>
+</div>
+<script src="/Little-Brother/static/p5.min.js"></script>
+<script src="/Little-Brother/static/p5.sound.min.js"></script>
+<script src="/Little-Brother/remote/map/main.js"></script>
+
 {% endblock %}

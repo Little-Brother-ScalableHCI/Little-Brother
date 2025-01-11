@@ -12,10 +12,11 @@ import speech_recognition as sr
 
 def main():
     db = redis.Redis(host="redis", port=6379, db=0)
-    recognizer = sr.Recognizer()
-    microphone = sr.Microphone()
 
     while True:
+        recognizer = sr.Recognizer()
+        microphone = sr.Microphone()
+
         with microphone as source:
             recognizer.adjust_for_ambient_noise(source)
             print("Listening for audio...")

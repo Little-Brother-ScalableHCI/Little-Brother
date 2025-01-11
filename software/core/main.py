@@ -15,7 +15,7 @@ cam_sent = False
 @sio.on('get-camera-feed')
 def sio_camera_feed():
     global cam_sent
-    if not cam_img and cam_sent:
+    if cam_img is None or len(cam_img) == 0 or cam_sent:
         return
     _, buffer = cv2.imencode('.png', cam_img)
     buffer = buffer.tobytes()
@@ -31,7 +31,7 @@ def update_camera():
     for binary_data in ps.listen():
         try:
             cam_img = pickle.loads(bytes(binary_data["data"]))
-            print("New frame")
+            # print("New frame")
             cam_sent = False
         except pickle.UnpicklingError:
             pass
@@ -47,11 +47,9 @@ items_sent = False
 @sio.on('get-items')
 def sio_items():
     global items_sent
-    if not cam_img or items_sent:
+    if len(items) == 0 or items_sent:
         return
-    _, buffer = cv2.imencode('.png', cam_img)
-    buffer = buffer.tobytes()
-    sio.emit('items', buffer)
+    sio.emit('items', items)
     items_sent = True
 
 
@@ -63,7 +61,7 @@ def update_items():
     for binary_data in ps.listen():
         try:
             items = pickle.loads(bytes(binary_data["data"]))
-            print("Updated items")
+            # print("Updated items")
             items_sent = False
         except pickle.UnpicklingError:
             pass
@@ -74,29 +72,27 @@ threading.Thread(target=update_items).start()
 
 
 #* Managing commands
-command = ""
-command_sent = False
+commands = []
 @sio.on('get-commands')
 def sio_commands_feed():
-    global command_sent
-    if not command or command_sent:
+    if not commands:
         return
-    _, buffer = cv2.imencode('.png', cam_img)
-    buffer = buffer.tobytes()
-    sio.emit('commands', buffer)
-    command_sent = True
+    sio.emit('commands', commands)
 
+
+@sio.on('send-command')
+def sio_send_command(data):
+    db.set("speech-to-text", pickle.dumps(data))
+    db.publish("speech-to-text", pickle.dumps(data))
 
 def update_commands():
-    global command
-    global command_sent
+    global commands
     ps = db.pubsub()
     ps.subscribe("command")
     for binary_data in ps.listen():
         try:
             command = pickle.loads(bytes(binary_data["data"]))
-            print("Updated command")
-            command_sent = False
+            commands.append(command)
         except pickle.UnpicklingError:
             pass
         except Exception as e:

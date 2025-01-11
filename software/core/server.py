@@ -33,7 +33,6 @@ def display():
 def display_path(path):
     return send_from_directory('templates/display', path)
 
-
 @app.route(base_path + '/camera', methods=['GET', 'POST'])
 def camera_data():
     print(request.data)
