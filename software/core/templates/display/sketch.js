@@ -1,7 +1,22 @@
 var w = window.innerWidth;
 var h = window.innerHeight;
 
-var objectFound;
+var itemFound;
+var spotlight;
+var arrow;
+
+// Simple spotlight effect
+class SearchingItem {
+  constructor(diameter) {
+    this.diameter = diameter;
+  }
+  display() {
+    drawingContext.filter = 'blur(22px)';
+    noStroke();
+    fill(255);
+    circle(w/2, h/2, this.diameter);
+  }
+}
 
 // Makes a circle grow from minDiameter to maxDiameter, while decreasing strokeWeight from maxStrokeWeight to 0
 class GrowingCircle {
@@ -17,8 +32,8 @@ class GrowingCircle {
     this.state = state;
   }
 
-  show() {
-    drawingContext.filter = 'blur(8px)';
+  display() {
+    drawingContext.filter = 'blur(6px)';
     noFill();
     stroke(255);
     strokeWeight(this.strokeWeight);
@@ -38,7 +53,7 @@ class GrowingCircle {
 }
 
 // Creates 3 centered GrowingCircles with an offset
-class ObjectFound {
+class ItemFound {
   constructor(x, y, minDiameter, maxDiameter, maxStrokeWeight) {
     this.circles = [];
     let offsets = [0, 1 / 3, 2 / 3]; // Offsets
@@ -47,9 +62,9 @@ class ObjectFound {
     }
   }
 
-  show() {
+  display() {
     for (let circle of this.circles) {
-      circle.show();
+      circle.display();
     }
   }
 
@@ -58,18 +73,53 @@ class ObjectFound {
       circle.animate();
     }
   }
+
+  update(x, y, minDiameter, maxDiameter, maxStrokeWeight) {
+    for (let circle of this.circles) {
+      circle.x = x;
+      circle.y = y;
+      circle.minDiameter = minDiameter;
+      circle.maxDiameter = maxDiameter;
+      circle.maxStrokeWeight = maxStrokeWeight;
+    }
+  }
+}
+
+class FollowMe {
+  constructor(angle) {
+    this.angle = angle
+  }
+
+  display() {
+    stroke(255);
+    strokeWeight(50);
+    translate(w/2, h/2);
+    rotate(45 + this.angle);
+    line(0, 0, 0, h/4);
+    line(0, 0, h/4, 0);
+  }
+
+  update(angle) {
+    this.angle = angle;
+  }
 }
 
 function setup() {
   createCanvas(w, h);
   frameRate(60);
-  objectFound = new ObjectFound(w / 2, h / 2, h / 3, h / 1.5, 10);
+  angleMode(DEGREES);
+  // spotlight = new SearchingItem(h * 0.95);
+  itemFound = new ItemFound(w/2, h/2, h/3, h/1.5, 10);
+  // arrow = new FollowMe(0);
 }
 
 function draw() {
   background(0);
-  objectFound.show();
-  objectFound.animate();
+  itemFound.display();
+  itemFound.animate();
+  // spotlight.display();
+  // arrow.display();
+  // arrow.update(frameCount % 360);
 }
 
 window.onresize = function() {
