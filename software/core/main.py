@@ -1,3 +1,4 @@
+import json
 import pickle
 import redis
 import threading
@@ -42,16 +43,16 @@ threading.Thread(target=update_camera).start()
 
 
 #* Managing inventory
-items = []
+items = {}  # Use a dictionary to store items by label
 items_sent = False
+
 @sio.on('get-items')
 def sio_items():
     global items_sent
-    if len(items) == 0 or items_sent:
+    if not items or items_sent:
         return
-    sio.emit('items', items)
+    sio.emit('items', list(items.values()))  # Send a list of items
     items_sent = True
-
 
 def update_items():
     global items
@@ -60,8 +61,15 @@ def update_items():
     ps.subscribe("items")
     for binary_data in ps.listen():
         try:
-            items = pickle.loads(bytes(binary_data["data"]))
-            # print("Updated items")
+            new_items = json.loads(pickle.loads(bytes(binary_data["data"])).replace("'", '"'))
+            for new_item in new_items:
+                label = new_item["lbl"]
+                if label in items:
+                    # Update existing item with the same label
+                    items[label] = new_item
+                else:
+                    # Add new item
+                    items[label] = new_item
             items_sent = False
         except pickle.UnpicklingError:
             pass
@@ -78,7 +86,6 @@ def sio_commands_feed():
     if not commands:
         return
     sio.emit('commands', commands)
-
 
 @sio.on('send-command')
 def sio_send_command(data):

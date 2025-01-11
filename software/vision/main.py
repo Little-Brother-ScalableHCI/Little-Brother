@@ -30,7 +30,7 @@ async def main():
         print("Error: Could not open camera.")
         return
 
-    uri = "ws://0.0.0.0:5050/process_image"
+    uri = "ws://172.20.10.4:5050/process_image"
 
     while True:
         ret, frame = cap.read()
@@ -40,8 +40,8 @@ async def main():
             break
 
         response = await send(uri, frame)
-        # db.set("camera-feed", pickle.dumps(frame))
-        # db.publish("camera-feed", pickle.dumps(frame))
+        db.set("camera-feed", pickle.dumps(frame))
+        db.publish("camera-feed", pickle.dumps(frame))
         db.set("items", pickle.dumps(response))
         db.publish("items", pickle.dumps(response))
 

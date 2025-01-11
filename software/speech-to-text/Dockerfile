@@ -12,6 +12,8 @@ RUN apt-get update && \
 
 RUN pip install -r requirements.txt
 
+RUN apt-get install -y --no-install-recommends flac
+
 COPY . /app
 
 CMD ["python", "-u", "main.py", "&>", "/dev/null"]
