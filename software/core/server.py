@@ -25,6 +25,15 @@ def remote():
     return render_template('remote/index.html')
 
 
+@app.route(base_path + '/display', methods=['GET', 'POST'])
+def display():
+    return render_template('display/index.html')
+
+@app.route(base_path + '/display/<path:path>')
+def display_path(path):
+    return send_from_directory('templates/display', path)
+
+
 @app.route(base_path + '/camera', methods=['GET', 'POST'])
 def camera_data():
     print(request.data)
@@ -49,7 +58,3 @@ def remote_path(path):
 @app.route(base_path + '/static/<path:path>')
 def send_static(path):
     return send_from_directory('static', path)
-
-@sio.on('cbs-home')
-def cbs_home():
-    print("Homing")
