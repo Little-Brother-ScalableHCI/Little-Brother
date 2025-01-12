@@ -49,7 +49,11 @@ TOOL_SYNONYMS = {
     "press brake": ["press brake"],
     "sheet metal bender": ["sheet metal bender", "metal bender"],
     "surface grinder": ["surface grinder"],
-    "tool grinder": ["tool grinder"]
+    "tool grinder": ["tool grinder"],
+
+    # Others
+    "cell phone": ["cell phone", "mobile phone", "phone"],
+    "bottle": ["bottle"],
 }
 
 ##############################################################################
@@ -167,6 +171,7 @@ def main():
     # PART B: (Optional) Speech-to-Text, then NLU
     # print("\n--- Testing with Speech-to-Text (Press CTRL+C to exit) ---")
 
+    print("Waiting for speech-to-text data...")
     ps = db.pubsub()
     ps.subscribe("speech-to-text")
     for binary_data in ps.listen():
@@ -182,6 +187,7 @@ def main():
             # If transcription failed or empty, skip
             continue
 
+        print("Transcribed:", text_input)
         # Process the transcribed text
         doc = nlp(text_input)
         structured_cmd = build_command_structure(text_input, doc)

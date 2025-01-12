@@ -45,6 +45,13 @@ function draw() {
 
         items.forEach((item) => {
             push();
+            translate(width / 2, height / 2);
+            scale(100);
+            stroke(255);
+            strokeWeight(0.1);
+            circle(item.world[0], item.world[1], 0.1);
+            pop();
+            push();
             stroke(255);
             strokeWeight(2);
             noFill();
@@ -83,4 +90,30 @@ setInterval(() => {
 socket.on("items", (itms) => {
     items = eval(itms);
     console.log(itms);
+});
+
+
+let findCellPhoneButton = document.getElementById('find-cell-phone');
+findCellPhoneButton.addEventListener('click', () => {
+    socket.emit('send-command', "Where is my cell phone");
+});
+let findScrewdriverButton = document.getElementById('find-screwdriver');
+findScrewdriverButton.addEventListener('click', () => {
+    socket.emit('send-command', "Where is the screwdriver");
+});
+let findPliersButton = document.getElementById('find-pliers');
+findPliersButton.addEventListener('click', () => {
+    socket.emit('send-command', "Where are the pliers");
+});
+let findHammerButton = document.getElementById('find-hammer');
+findHammerButton.addEventListener('click', () => {
+    socket.emit('send-command', "Where is the hammer");
+});
+let findWrenchButton = document.getElementById('find-wrench');
+findWrenchButton.addEventListener('click', () => {
+    socket.emit('send-command', "Where is the wrench");
+});
+let findScissorsButton = document.getElementById('find-scissors');
+findScissorsButton.addEventListener('click', () => {
+    socket.emit('send-command', "Where are the scissors");
 });

@@ -1,7 +1,9 @@
 import json
+import math
 import pickle
 import redis
 import threading
+import time
 
 import cv2
 
@@ -62,14 +64,11 @@ def update_items():
     for binary_data in ps.listen():
         try:
             new_items = json.loads(pickle.loads(bytes(binary_data["data"])).replace("'", '"'))
+
             for new_item in new_items:
                 label = new_item["lbl"]
-                if label in items:
-                    # Update existing item with the same label
-                    items[label] = new_item
-                else:
-                    # Add new item
-                    items[label] = new_item
+                items[label] = new_item
+                items[label]["world"] = camera_to_world(new_item["coords"][0], new_item["coords"][1])
             items_sent = False
         except pickle.UnpicklingError:
             pass
@@ -100,6 +99,13 @@ def update_commands():
         try:
             command = pickle.loads(bytes(binary_data["data"]))
             commands.append(command)
+            if command["intent"] == "find_location":
+                target_item = command["object"]
+                if target_item not in items:
+                    print(f"Item '{target_item}' not found in inventory")
+                    continue
+                target_coords = items[target_item]["world"]
+                move_to_coords(target_coords)
         except pickle.UnpicklingError:
             pass
         except Exception as e:
@@ -107,8 +113,96 @@ def update_commands():
 threading.Thread(target=update_commands).start()
 
 
+@sio.on('send-serial-command')
+def sio_send_command(data):
+    db.set("serial-command", pickle.dumps(data))
+    db.publish("serial-command", pickle.dumps(data))
 
+def send_command(command):
+    db.set("serial-command", pickle.dumps(command))
+    db.publish("serial-command", pickle.dumps(command))
 
+def offset_items(offset):
+    for item in items.values():
+        item["world"] = (item["world"][0] - offset[0], item["world"][1] - offset[1])
+
+#* CBPR Pulleys coords
+L1 = 2.4
+L2 = 3
+L3 = 3
+p = (L1 + L2 + L3) / 2
+s = math.sqrt(p * (p - L1) * (p - L2) * (p - L3))
+h = 2 * s / L2
+A1 = [0, L2, 0]
+A2 = [h, math.sqrt(L1**2 - h**2), 0]
+A3 = [0, 0, 0]
+initial_position = [1, 1.5, 0.5]
+initial_cable_lengths = [
+    math.sqrt((initial_position[0] - A1[0])**2 + (initial_position[1] - A1[1])**2 + (initial_position[2] - A1[2])**2),
+    math.sqrt((initial_position[0] - A2[0])**2 + (initial_position[1] - A2[1])**2 + (initial_position[2] - A2[2])**2),
+    math.sqrt((initial_position[0] - A3[0])**2 + (initial_position[1] - A3[1])**2 + (initial_position[2] - A3[2])**2)
+]
+current_position = initial_position
+is_moving = False
+STEPS = 10
+
+def move_to_coords(object_offset):
+    global is_moving
+    global current_position
+    if is_moving:
+        print("Already moving")
+        return
+    print(f"Moving to coordinates {object_offset}")
+    is_moving = True
+    for i in range(STEPS):
+        target_position = [
+            current_position[0] + i * object_offset[0] / STEPS,
+            current_position[1] + i * object_offset[1] / STEPS,
+            initial_position[2]
+        ]
+
+        # current_c1 = math.sqrt((current_position[0] - A1[0])**2 + (current_position[1] - A1[1])**2 + (current_position[2] - A1[2])**2)
+        target_c1 = math.sqrt((target_position[0] - A1[0])**2 + (target_position[1] - A1[1])**2 + (target_position[2] - A1[2])**2)
+        delta_c1 = target_c1 - initial_cable_lengths[0]
+
+        # current_c2 = math.sqrt((current_position[0] - A2[0])**2 + (current_position[1] - A2[1])**2 + (current_position[2] - A2[2])**2)
+        target_c2 = math.sqrt((target_position[0] - A2[0])**2 + (target_position[1] - A2[1])**2 + (target_position[2] - A2[2])**2)
+        delta_c2 = target_c2 - initial_cable_lengths[1]
+
+        # current_c3 = math.sqrt((current_position[0] - A3[0])**2 + (current_position[1] - A3[1])**2 + (current_position[2] - A3[2])**2)
+        target_c3 = math.sqrt((target_position[0] - A3[0])**2 + (target_position[1] - A3[1])**2 + (target_position[2] - A3[2])**2)
+        delta_c3 = target_c3 - initial_cable_lengths[2]
+
+        send_command(f"G0 X{int(1000*delta_c2)} Y{int(1000*delta_c3)} Z{int(1000*delta_c1)}")
+
+        offset_items([object_offset[0] / STEPS, object_offset[1] / STEPS])
+
+        time.sleep(1)
+
+    current_position = [
+        current_position[0] + object_offset[0],
+        current_position[1] + object_offset[1],
+    ]
+    is_moving = False
+
+def camera_to_world(x, y):
+    # Convert camera coordinates to world coordinates for the logitech C270 camera
+    Z = 2.5  # Height of the cameras from the table
+    F = 55  # Diagonal ield of view of the camera
+    image_width = 640
+    image_height = 480
+    diagonal_pixels = math.sqrt(image_width**2 + image_height**2)
+    f = (diagonal_pixels / 2) / math.tan(math.radians(F / 2))
+
+    # Calculate the center of the image
+    cx = image_width / 2
+    cy = image_height / 2
+
+    # Convert camera coordinates to world coordinates
+    X = (x - cx) * Z / f
+    Y = (y - cy) * Z / f
+
+    return (X, Y)
 
 
 # items = db.get("items")

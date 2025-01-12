@@ -3,8 +3,10 @@ import base64
 import cv2
 import json
 import numpy as np
+import serial
 import websockets
 from ultralytics import YOLO
+
 
 TOOL_DB = {
     "hammer", "wrench", "drill", "saw", "knife", "lathe",
@@ -12,7 +14,15 @@ TOOL_DB = {
     "person", "bottle", "cell phone", "keyboard", "mouse"
 }
 
-model = YOLO("yolov8n.pt")  # or "yolov5s.pt", etc.
+model = YOLO("yolov8n.pt")
+
+
+port = "/dev/ttyUSB0"
+baudrate = 115200
+
+# Create a serial object
+# ser = serial.Serial(port, baudrate)
+
 
 async def process_image(websocket, data):
     try:
@@ -55,23 +65,17 @@ async def process_image(websocket, data):
         print(f"Error processing image: {e}")
         await websocket.send(f"Error: {e}")
 
-async def send_command(websocket, path):
-    async for message in websocket:
-        try:
-            # --- Process the command received from the client ---
-            print(f"Received command: {message}")
+async def send_command(websocket, data):
+    try:
+        command = data + "\n"
+        response = ""
+        # ser.write(command.encode())
+        # response = ser.readline().decode().strip()
+        await websocket.send(f"Response: {response}")
 
-            # --- Perform actions based on the command ---
-            # Example: If the command is "start", do something
-            if message == "start":
-                await websocket.send("Starting process...")
-                # ... your code to start a process ...
-            else:
-                await websocket.send("Unknown command")
-
-        except Exception as e:
-            print(f"Error processing command: {e}")
-            await websocket.send(f"Error: {e}")
+    except Exception as e:
+        print(f"Error processing command: {e}")
+        await websocket.send(f"Error: {e}")
 
 async def handler(websocket):
     # Determine which endpoint to use based on the path
@@ -92,6 +96,9 @@ async def main():
     async with websockets.serve(handler, "0.0.0.0", 5050):
         print("WebSocket server started on ws://0.0.0.0:5050")
         await asyncio.Future()  # Run forever
+
+    ser.close()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -30,8 +30,9 @@ async def main():
         print("Error: Could not open camera.")
         return
 
-    uri = "ws://172.20.10.4:5050/process_image"
+    uri = "ws://0.0.0.0:5050/"
 
+    print("Streaming camera feed to", uri)
     while True:
         ret, frame = cap.read()
 
@@ -47,7 +48,6 @@ async def main():
 
 
     cap.release()
-
 
 if __name__ == "__main__":
     asyncio.run(main())

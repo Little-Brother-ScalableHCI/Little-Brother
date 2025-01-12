@@ -43,6 +43,14 @@ services:
       - redis
     network_mode: "host"
 
+  commands:
+    build: commands
+    privileged: true
+    volumes:
+      - /dev:/dev
+    depends_on:
+      - redis
+    network_mode: "host"
 
 networks:
   redis:
