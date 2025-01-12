@@ -54,6 +54,7 @@ TOOL_SYNONYMS = {
     # Others
     "cell phone": ["cell phone", "mobile phone", "phone"],
     "bottle": ["bottle"],
+    "mouse": ["mouse"],
 }
 
 ##############################################################################

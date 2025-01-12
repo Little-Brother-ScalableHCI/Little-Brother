@@ -8,6 +8,38 @@ var arrow;
 var orange;
 var blue;
 
+
+let currentActivity = "None"; // "None", "Moving", "Found"
+let activityData = {};
+
+const socket = io.connect(window.location.origin, {
+  path: "/Little-Brother/socket.io",
+  cors: {
+      origin: "*",
+      methods: ["GET", "POST"]
+  },
+agent: false,
+upgrade: false,
+rejectUnauthorized: false,
+  transports: ["websocket"],
+  query: "source=display"
+});
+
+socket.on('connect', () => {
+  console.log('Connected to server');
+});
+
+setInterval(() => {
+  socket.emit('get-activity');
+}, 33);
+
+socket.on('activity', (activity) => {
+  currentActivity = activity["activity"];
+  activityData = activity["data"];
+  console.log(currentActivity);
+});
+
+
 // Simple spotlight effect
 class SearchingItem {
   constructor(diameter) {
@@ -135,7 +167,7 @@ class MovingArrow {
     // Increment the position of the arrow
     this.x += this.speed * sin(this.angle);
     this.y -= this.speed * cos(this.angle);
-    
+
   }
 
   update(angle) {
@@ -158,11 +190,19 @@ function setup() {
 
 function draw() {
   background(0);
-  // itemFound.display();
-  // itemFound.animate();
   // spotlight.display();
-  arrow.display()
-  arrow.animate();
+  if (currentActivity == "Found") {
+    itemFound.display();
+    itemFound.animate();
+  } else if (currentActivity == "Moving") {
+    arrow.display();
+    arrow.animate();
+  } else if (currentActivity == "Not found") {
+    textSize(32);
+    textAlign(CENTER, CENTER);
+    fill(255);
+    text("?", w/2, h/2);
+  }
 }
 
 window.onresize = function() {

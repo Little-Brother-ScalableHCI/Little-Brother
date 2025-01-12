@@ -16,12 +16,19 @@ TOOL_DB = {
 
 model = YOLO("yolov8n.pt")
 
-
-port = "/dev/ttyUSB0"
 baudrate = 115200
 
 # Create a serial object
-# ser = serial.Serial(port, baudrate)
+ser = None
+for i in range(10):
+    try:
+        ser = serial.Serial(f"/dev/ttyUSB{i}", baudrate)
+    except Exception as e:
+        pass
+
+if ser is None:
+    print("Serial port not found")
+    exit(1)
 
 
 async def process_image(websocket, data):
@@ -67,10 +74,10 @@ async def process_image(websocket, data):
 
 async def send_command(websocket, data):
     try:
-        command = data + "\n"
+        command = data + " F2000\n"
         response = ""
-        # ser.write(command.encode())
-        # response = ser.readline().decode().strip()
+        ser.write(command.encode())
+        response = ser.readline().decode().strip()
         await websocket.send(f"Response: {response}")
 
     except Exception as e:

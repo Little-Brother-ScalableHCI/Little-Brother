@@ -117,3 +117,7 @@ let findScissorsButton = document.getElementById('find-scissors');
 findScissorsButton.addEventListener('click', () => {
     socket.emit('send-command', "Where are the scissors");
 });
+let findMouseButton = document.getElementById('find-mouse');
+findMouseButton.addEventListener('click', () => {
+    socket.emit('send-command', "Where is the mouse");
+});
