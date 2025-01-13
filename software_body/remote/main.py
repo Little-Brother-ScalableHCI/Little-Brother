@@ -6,7 +6,6 @@ import websockets
 
 baudrate = 115200
 
-
 ser = None
 serial_connected = False
 while not serial_connected:
@@ -14,17 +13,19 @@ while not serial_connected:
     for i in range(10):
         try:
             ser = serial.Serial(f"/dev/ttyUSB{i}", baudrate)
+            serial_connected = True
+            break
         except Exception as e:
             pass
 
     if ser is None:
         print("Serial port not found")
-        exit(1)
+        time.sleep(5)
 
 
 async def send_command(websocket, data):
     try:
-        command = data + " F2000\n"
+        command = data + " F1000\n"
         response = ""
         ser.write(command.encode())
         response = ser.readline().decode().strip()

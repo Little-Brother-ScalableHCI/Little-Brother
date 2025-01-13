@@ -164,7 +164,7 @@ STEPS = 10
 
 
 
-def inverse_kinematics(x, y, z=initial_position[2]):
+def inverse_kinematics(x, y, z):
     """
     Calculates the cable length changes (delta_c1, delta_c2, delta_c3)
     required to move the end effector to the given (x, y, z) coordinates.
@@ -202,13 +202,13 @@ def move_to_coords(object_offset):
         target_position = [
             current_position[0] + i * object_offset[0] / STEPS,
             current_position[1] + i * object_offset[1] / STEPS,
-            initial_position[2]
+            current_position[2]
         ]
 
-        deltas = inverse_kinematics(target_position[0], target_position[1])
+        deltas = inverse_kinematics(target_position[0], target_position[1], target_position[2])
         delta_c1, delta_c2, delta_c3 = deltas
 
-        send_command(f"G0 X{-1*int(1000*delta_c2)} Y{-1*int(1000*delta_c3)} Z{-1*int(1000*delta_c1)}")
+        send_command(f"G0 X{int(1000*delta_c2)} Y{int(1000*delta_c3)} Z{int(1000*delta_c1)}")
 
         offset_items([object_offset[0] / STEPS, object_offset[1] / STEPS])
 
@@ -217,6 +217,7 @@ def move_to_coords(object_offset):
     current_position = [
         current_position[0] + object_offset[0],
         current_position[1] + object_offset[1],
+        current_position[2] + object_offset[2],
     ]
     is_moving = False
     current_activity = "Found"
@@ -226,16 +227,39 @@ def sio_update_position(data):
     global current_position
     x = data["x"]
     y = data["y"]
+    z = data["z"]
 
     # Calculate inverse kinematics
-    deltas = inverse_kinematics(current_position[0] + x, current_position[1] + y)
+    deltas = inverse_kinematics(current_position[0] + x, current_position[1] + y , current_position[2] + z)
     if deltas is not None:
         delta_c1, delta_c2, delta_c3 = deltas
-        command = f"G0 X{-1*int(1000*delta_c2)} Y{-1*int(1000*delta_c3)} Z{-1*int(1000*delta_c1)}"
+        command = f"G0 X{int(1000*delta_c2)} Y{int(1000*delta_c3)} Z{int(1000*delta_c1)}"
         print("Sending command:", command)
         send_command(command)
-        current_position = [current_position[0] + x, current_position[1] + y, initial_position[2]] # Update current position
+        current_position = [current_position[0] + x, current_position[1] + y, current_position[2] + z] # Update current position
 
+@sio.on('home')
+def sio_home():
+    global current_position
+    global current_activity
+    current_position = initial_position
+    current_activity = "Home"
+    command = "G0 X0 Y0 Z0"
+    print("Sending command:", command)
+    send_command(command)
+
+
+@sio.on('get-cable-lengths')
+def sio_get_cable_lengths():
+    # Calculate current cable lengths based on current_position
+    deltas = inverse_kinematics(current_position[0], current_position[1], current_position[2])
+    if deltas is not None:
+        delta_c1, delta_c2, delta_c3 = deltas
+        sio.emit('cable-lengths', {
+            'x': int(1000 * delta_c1),  # Adjust scaling if needed
+            'y': int(1000 * delta_c2),
+            'z': int(1000 * delta_c3)
+        })
 
 def camera_to_world(x, y):
     # Convert camera coordinates to world coordinates for the logitech C270 camera

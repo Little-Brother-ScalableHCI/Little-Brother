@@ -22,13 +22,23 @@ data = b''
 while True:
     try:
         # Create a Socket.IO client
-        sio = socketio.Client()
+        sio = socketio.Client(
+            reconnection=True,  # Equivalent to upgrade: false
+            ssl_verify=False,     # Equivalent to rejectUnauthorized: false
+        )
 
         connected = False
         # Connect to the server
         while not connected:
             try:
-                sio.connect('http://170.20.10.3:5000')
+
+                sio.connect(
+                    'http://127.0.0.1:5000',
+                    socketio_path="/Little-Brother/socket.io",
+                    headers={'Origin': '*'},  # For CORS
+                    auth={'source': 'display'},  # Equivalent to query
+                    transports=['websocket']
+                )
                 connected = True
             except Exception as e:
                 print(e)

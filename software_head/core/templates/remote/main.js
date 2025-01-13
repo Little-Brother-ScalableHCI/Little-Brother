@@ -10,7 +10,3 @@ const socket = io.connect(window.location.origin, {
     transports: ["websocket"],
     query: "source=display"
 });
-
-socket.on('connect', () => {
-    console.log('Connected to server');
-});

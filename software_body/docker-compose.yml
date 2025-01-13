@@ -1,8 +1,10 @@
 services:
   remote:
     build: remote
+    privileged: true
     network_mode: "host"
 
   yolo:
     build: yolo
+    privileged: true
     network_mode: "host"
