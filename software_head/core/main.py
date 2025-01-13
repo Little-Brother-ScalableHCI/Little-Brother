@@ -194,6 +194,7 @@ def move_to_coords(object_offset):
     if is_moving:
         print("Already moving")
         return
+
     print(f"Moving to coordinates {object_offset}")
     is_moving = True
     current_activity = "Moving"
@@ -217,7 +218,7 @@ def move_to_coords(object_offset):
     current_position = [
         current_position[0] + object_offset[0],
         current_position[1] + object_offset[1],
-        current_position[2] + object_offset[2],
+        current_position[2],
     ]
     is_moving = False
     current_activity = "Found"
