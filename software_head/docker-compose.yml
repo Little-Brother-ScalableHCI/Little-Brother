@@ -1,0 +1,57 @@
+services:
+  core:
+    build: core
+    ports:
+      - "5000:5000"
+    depends_on:
+      - redis
+    networks:
+      - redis
+
+  redis:
+    image: redis:alpine  # Use the official Redis Alpine image
+    ports:
+      - "6379:6379"
+    networks:
+      - redis
+
+  speech-to-text:
+    build: speech-to-text
+    privileged: true
+    volumes:
+      - /dev:/dev
+    depends_on:
+      - redis
+    networks:
+      - redis
+    logging:
+      driver: none
+
+  text-to-commands:
+    build: text-to-commands
+    depends_on:
+      - redis
+    networks:
+      - redis
+
+  vision:
+    build: vision
+    privileged: true
+    volumes:
+      - /dev:/dev
+    depends_on:
+      - redis
+    network_mode: "host"
+
+  commands:
+    build: commands
+    privileged: true
+    volumes:
+      - /dev:/dev
+    depends_on:
+      - redis
+    network_mode: "host"
+
+networks:
+  redis:
+    driver: bridge

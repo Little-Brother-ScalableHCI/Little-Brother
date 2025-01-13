@@ -1,0 +1,8 @@
+services:
+  remote:
+    build: remote
+    network_mode: "host"
+
+  yolo:
+    build: yolo
+    network_mode: "host"

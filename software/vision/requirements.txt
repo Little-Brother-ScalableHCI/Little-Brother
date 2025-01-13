@@ -1,5 +1,0 @@
-async-timeout==5.0.1
-numpy==2.2.1
-opencv-python-headless
-redis==5.2.1
-websockets==14.1

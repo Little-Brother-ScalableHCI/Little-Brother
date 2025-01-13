@@ -1,3 +1,0 @@
-async-timeout==5.0.1
-redis==5.2.1
-websockets==14.1

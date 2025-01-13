@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Little Brother Remote</title>
+    <script src="/Little-Brother/static/socket.io-4.7.2.js"></script>
+    <link rel="stylesheet" href="/Little-Brother/remote/style.css">
+</head>
+<body>
+    <script src="/Little-Brother/remote/main.js"></script>
+    <div id="container">
+        {% block content %} {% endblock %}
+        <div id="pages">
+            <a id="map-button" href="/Little-Brother/remote/map">Map</a>
+            <a id="control-button" href="/Little-Brother/remote/control">Control</a>
+            <a id="commands-button" href="/Little-Brother/remote/commands">Commands</a>
+        </div>
+    </div>
+</body>
+</html>
