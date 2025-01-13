@@ -29,12 +29,16 @@ def main():
         db = redis.Redis(host="0.0.0.0", port=6379, db=0)
 
         try:
+            i = 0
             while True:
                 # Read a frame from the camera
                 ret, frame = cam.read()
                 if not ret:
                     print("Failed to grab frame")
                     break
+
+                if not i % 5 == 0:
+                    continue
 
                 # Encode the frame as JPEG
                 result, encoded_image = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
