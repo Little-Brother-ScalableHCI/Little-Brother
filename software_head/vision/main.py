@@ -37,9 +37,9 @@ def main():
                     print("Failed to grab frame")
                     break
 
+                i = i+1
                 if not i % 5 == 0:
                     continue
-                i = i+1
 
                 # Encode the frame as JPEG
                 result, encoded_image = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
