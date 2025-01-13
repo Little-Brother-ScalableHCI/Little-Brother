@@ -21,7 +21,8 @@ async def main():
     db = redis.Redis(host="0.0.0.0", port=6379, db=0)
 
     # uri = "ws://172.20.10.4:5050/"
-    uri = "ws://127.0.0.1:5050/"
+    # uri = "ws://127.0.0.1:5050/"
+    uri = "ws://192.168.157.1:5050/"
 
     print("Listening for commands...")
     ps = db.pubsub()
