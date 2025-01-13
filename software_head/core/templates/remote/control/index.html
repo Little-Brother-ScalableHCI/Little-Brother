@@ -1,5 +1,34 @@
 {% extends 'remote/index.html' %}
 
 {% block content %}
-    <h1>control</h1>
+<div id="control-panel">
+    <h2>Cable Length Control</h2>
+    <div class="slider-group">
+        <label for="cable1">Cable 1:</label>
+        <input type="range" id="cable1" min="0" max="1000" value="0">
+        <span id="cable1-value">0</span>
+    </div>
+    <div class="slider-group">
+        <label for="cable2">Cable 2:</label>
+        <input type="range" id="cable2" min="0" max="1000" value="0">
+        <span id="cable2-value">0</span>
+    </div>
+    <div class="slider-group">
+        <label for="cable3">Cable 3:</label>
+        <input type="range" id="cable3" min="0" max="1000" value="0">
+        <span id="cable3-value">0</span>
+    </div>
+    <button id="update-cables">Update Cable Lengths</button>
+
+    <h2>Position Control</h2>
+    <div class="input-group">
+        <label for="x-coord">X:</label>
+        <input type="number" id="x-coord" value="0">
+    </div>
+    <div class="input-group">
+        <label for="y-coord">Y:</label>
+        <input type="number" id="y-coord" value="0">
+    </div>
+    <button id="update-position">Update Position</button>
+</div>
 {% endblock %}

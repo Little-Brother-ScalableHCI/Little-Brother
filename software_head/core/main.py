@@ -141,9 +141,9 @@ def offset_items(offset):
         item["world"] = (item["world"][0] - offset[0], item["world"][1] - offset[1])
 
 #* CBPR Pulleys coords
-L1 = 2.4
-L2 = 3.26
-L3 = 3.05
+L1 = 2.007
+L2 = 3.315
+L3 = 3.143
 
 p = (L1 + L2 + L3) / 2
 s = math.sqrt(p * (p - L1) * (p - L2) * (p - L3))
@@ -152,7 +152,7 @@ h = 2 * s / L2
 A1 = [0, L2, 0]
 A2 = [h, math.sqrt(L1**2 - h**2), 0]
 A3 = [0, 0, 0]
-initial_position = [1, 1.5, 0.5]
+initial_position = [0.774, 1.270, 1.820]
 initial_cable_lengths = [
     math.sqrt((initial_position[0] - A1[0])**2 + (initial_position[1] - A1[1])**2 + (initial_position[2] - A1[2])**2),
     math.sqrt((initial_position[0] - A2[0])**2 + (initial_position[1] - A2[1])**2 + (initial_position[2] - A2[2])**2),
@@ -161,6 +161,30 @@ initial_cable_lengths = [
 current_position = initial_position
 is_moving = False
 STEPS = 10
+
+
+
+def inverse_kinematics(x, y, z=initial_position[2]):
+    """
+    Calculates the cable length changes (delta_c1, delta_c2, delta_c3)
+    required to move the end effector to the given (x, y, z) coordinates.
+    """
+    try:
+        target_c1 = math.sqrt((x - A1[0])**2 + (y - A1[1])**2 + (z - A1[2])**2)
+        delta_c1 = target_c1 - initial_cable_lengths[0]
+
+        target_c2 = math.sqrt((x - A2[0])**2 + (y - A2[1])**2 + (z - A2[2])**2)
+        delta_c2 = target_c2 - initial_cable_lengths[1]
+
+        target_c3 = math.sqrt((x - A3[0])**2 + (y - A3[1])**2 + (z - A3[2])**2)
+        delta_c3 = target_c3 - initial_cable_lengths[2]
+
+        return delta_c1, delta_c2, delta_c3
+    except ValueError:
+        # Handle potential math domain errors (e.g., sqrt of negative number)
+        print("Error: Invalid position for inverse kinematics.")
+        return None
+
 
 def move_to_coords(object_offset):
     global is_moving
@@ -181,23 +205,10 @@ def move_to_coords(object_offset):
             initial_position[2]
         ]
 
-        # current_c1 = math.sqrt((current_position[0] - A1[0])**2 + (current_position[1] - A1[1])**2 + (current_position[2] - A1[2])**2)
-        target_c1 = math.sqrt((target_position[0] - A1[0])**2 + (target_position[1] - A1[1])**2 + (target_position[2] - A1[2])**2)
-        delta_c1 = target_c1 - initial_cable_lengths[0]
-
-        # current_c2 = math.sqrt((current_position[0] - A2[0])**2 + (current_position[1] - A2[1])**2 + (current_position[2] - A2[2])**2)
-        target_c2 = math.sqrt((target_position[0] - A2[0])**2 + (target_position[1] - A2[1])**2 + (target_position[2] - A2[2])**2)
-        delta_c2 = target_c2 - initial_cable_lengths[1]
-
-        # current_c3 = math.sqrt((current_position[0] - A3[0])**2 + (current_position[1] - A3[1])**2 + (current_position[2] - A3[2])**2)
-        target_c3 = math.sqrt((target_position[0] - A3[0])**2 + (target_position[1] - A3[1])**2 + (target_position[2] - A3[2])**2)
-        delta_c3 = target_c3 - initial_cable_lengths[2]
+        deltas = inverse_kinematics(target_position[0], target_position[1])
+        delta_c1, delta_c2, delta_c3 = deltas
 
         send_command(f"G0 X{-1*int(1000*delta_c2)} Y{-1*int(1000*delta_c3)} Z{-1*int(1000*delta_c1)}")
-
-        # while not pickle.loads(db.get("serial-command-response")).strip() == "ok":
-        #     time.sleep(0.1)
-        # db.set("serial-command-response", pickle.dumps({"ok": False}))
 
         offset_items([object_offset[0] / STEPS, object_offset[1] / STEPS])
 
@@ -209,6 +220,22 @@ def move_to_coords(object_offset):
     ]
     is_moving = False
     current_activity = "Found"
+
+@sio.on('update-position')
+def sio_update_position(data):
+    global current_position
+    x = data["x"]
+    y = data["y"]
+
+    # Calculate inverse kinematics
+    deltas = inverse_kinematics(current_position[0] + x, current_position[1] + y)
+    if deltas is not None:
+        delta_c1, delta_c2, delta_c3 = deltas
+        command = f"G0 X{-1*int(1000*delta_c2)} Y{-1*int(1000*delta_c3)} Z{-1*int(1000*delta_c1)}"
+        print("Sending command:", command)
+        send_command(command)
+        current_position = [current_position[0] + x, current_position[1] + y, initial_position[2]] # Update current position
+
 
 def camera_to_world(x, y):
     # Convert camera coordinates to world coordinates for the logitech C270 camera
@@ -236,15 +263,6 @@ def sio_activity():
         "data": activity_data
     })
 
-# items = db.get("items")
-
-# db.set("items", items)
-# db.publish("items", pickle.dumps(items))
-
-# ps = db.pubsub()
-# ps.subscribe("items")
-# for binary_data in ps.listen():
-#     print(pickle.loads(bytes(binary_data["data"])))
 
 print("Starting server")
 

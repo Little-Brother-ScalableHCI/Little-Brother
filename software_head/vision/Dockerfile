@@ -8,10 +8,10 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the streaming script
-COPY stream_server.py .
+COPY main.py .
 
 # Expose the streaming port
 EXPOSE 8554
 
 # Run the streaming script
-CMD ["python3", "stream_server.py"]
+CMD ["python3", "main.py"]
