@@ -69,7 +69,7 @@ function draw() {
 
 setInterval(() => {
     socket.emit("get-camera-feed");
-}, 50);
+}, 100);
 
 socket.on("camera-feed", (data) => {
     let blob = new Blob([data], { type: 'image/png' });

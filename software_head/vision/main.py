@@ -38,7 +38,7 @@ def main():
                     break
 
                 i = i+1
-                if not i % 2 == 0:
+                if not i % 3 == 0:
                     continue
 
                 # Encode the frame as JPEG
