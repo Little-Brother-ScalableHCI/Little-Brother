@@ -276,8 +276,8 @@ def camera_to_world(x, y):
     cy = image_height / 2
 
     # Convert camera coordinates to world coordinates
-    X = (x - cx) * Z / f
-    Y = (y - cy) * Z / f
+    Y = (x - cx) * Z / f
+    X = (y - cy) * Z / f
 
     return (X, Y)
 
