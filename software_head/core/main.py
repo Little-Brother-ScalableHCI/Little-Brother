@@ -264,7 +264,7 @@ def sio_get_cable_lengths():
 
 def camera_to_world(x, y):
     # Convert camera coordinates to world coordinates for the logitech C270 camera
-    Z = 1.5  # Height of the cameras from the table
+    Z = 1  # Height of the cameras from the table
     F = 55  # Diagonal ield of view of the camera
     image_width = 640
     image_height = 480
