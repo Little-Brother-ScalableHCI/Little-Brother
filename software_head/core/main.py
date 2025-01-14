@@ -277,7 +277,7 @@ def camera_to_world(x, y):
 
     # Convert camera coordinates to world coordinates
     Y = (x - cx) * Z / f
-    X = (y - cy) * Z / f
+    X = -1*(y - cy) * Z / f
 
     return (X, Y)
 
