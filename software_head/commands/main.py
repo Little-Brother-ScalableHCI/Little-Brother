@@ -22,7 +22,7 @@ async def main():
 
     # uri = "ws://172.20.10.4:5050/"
     # uri = "ws://127.0.0.1:5050/"
-    uri = "ws://192.168.157.1:5050/"
+    uri = "ws://10.42.0.1:5050/"
 
     print("Listening for commands...")
     ps = db.pubsub()

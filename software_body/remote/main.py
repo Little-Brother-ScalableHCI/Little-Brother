@@ -18,6 +18,14 @@ while not serial_connected:
         except Exception as e:
             pass
 
+    for i in range(10):
+        try:
+            ser = serial.Serial(f"/dev/ttyACM{i}", baudrate)
+            serial_connected = True
+            break
+        except Exception as e:
+            pass
+
     if ser is None:
         print("Serial port not found")
         time.sleep(5)
@@ -27,6 +35,7 @@ async def send_command(websocket, data):
     try:
         command = data + " F1000\n"
         response = ""
+        print(f"Sending command: {command}")
         ser.write(command.encode())
         response = ser.readline().decode().strip()
         await websocket.send(f"Response: {response}")

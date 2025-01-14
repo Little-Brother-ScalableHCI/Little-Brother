@@ -7,14 +7,15 @@ from ultralytics import YOLO
 import socketio
 
 # Replace with your Raspberry Pi's IP address and port
-RPI_IP = "192.168.157.161"
+RPI_IP = "10.42.0.47"
 # RPI_IP = "172.20.10.3"
 RPI_PORT = 8554
 
 TOOL_DB = {
     "hammer", "wrench", "drill", "saw", "knife", "lathe",
     "milling machine", "drill press", "pliers", "chisel",
-    "person", "bottle", "cell phone", "keyboard", "mouse"
+    "person", "bottle", "cell phone", "keyboard", "mouse",
+    "scissors", "toothbrush"
 }
 model = YOLO("yolov8n.pt")
 data = b''
@@ -34,7 +35,7 @@ while True:
             try:
 
                 sio.connect(
-                    'http://192.168.157.161:5000',
+                    f'http://{RPI_IP}:5000',
                     socketio_path="/Little-Brother/socket.io",
                     headers={'Origin': '*'},  # For CORS
                     auth={'source': 'display'},  # Equivalent to query
