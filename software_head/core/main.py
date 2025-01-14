@@ -213,7 +213,7 @@ def move_to_coords(object_offset):
 
         offset_items([object_offset[0] / STEPS, object_offset[1] / STEPS])
 
-        time.sleep(1)
+        # time.sleep(0.1)
 
     current_position = [
         current_position[0] + object_offset[0],
@@ -265,7 +265,7 @@ def sio_get_cable_lengths():
 def camera_to_world(x, y):
     # Convert camera coordinates to world coordinates for the logitech C270 camera
     Z = 1  # Height of the cameras from the table
-    F = 55  # Diagonal ield of view of the camera
+    F = 90  # Diagonal ield of view of the camera
     image_width = 640
     image_height = 480
     diagonal_pixels = math.sqrt(image_width**2 + image_height**2)
