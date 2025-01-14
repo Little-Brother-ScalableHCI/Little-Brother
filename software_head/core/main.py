@@ -152,7 +152,7 @@ h = 2 * s / L2
 A1 = [0, L2, 0]
 A2 = [h, math.sqrt(L1**2 - h**2), 0]
 A3 = [0, 0, 0]
-initial_position = [0.774, 1.270, 1.820]
+initial_position = [0.774, 1.270, 1.50]
 initial_cable_lengths = [
     math.sqrt((initial_position[0] - A1[0])**2 + (initial_position[1] - A1[1])**2 + (initial_position[2] - A1[2])**2),
     math.sqrt((initial_position[0] - A2[0])**2 + (initial_position[1] - A2[1])**2 + (initial_position[2] - A2[2])**2),
